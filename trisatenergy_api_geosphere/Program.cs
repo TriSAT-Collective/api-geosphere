@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using trisatenergy_api_geosphere.SmartMeterSimulation;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using ApiSdk;
+using trisatenergy_api_geosphere.Authentication;
 
 namespace trisatenergy_api_geosphere
 {
-    /// <summary>
-    /// Entry point of the application that runs the smart meter simulation.
-    /// </summary>
     class Program
     {
         static async Task Main(string[] args)
@@ -15,27 +16,43 @@ namespace trisatenergy_api_geosphere
             IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                    config
-                        .SetBasePath(AppDomain.CurrentDomain
-                            .BaseDirectory) // Set the base path to the current directory
+                    // Load configuration settings, including the JWT token
+                    config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                         .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
                         .AddEnvironmentVariables()
                         .AddCommandLine(args);
-
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    // Register AppSettings as a configuration instance
-                    services.Configure<AppSettings>(context.Configuration.GetSection(nameof(AppSettings)));
-                    // Add logging
+                    // Retrieve JWT token from settings.json
+                    string jwtToken = context.Configuration["AppSettings:JwtToken"];
+                    
+                    // Register JwtAuthenticationProvider with the token
+                    services.AddSingleton<IAuthenticationProvider>(new JwtAuthenticationProvider(jwtToken));
+
+                    // Register the HttpClient and a custom API client
+                    services.AddHttpClient();  // Registers IHttpClientFactory
+
+                    services.AddSingleton<ApiClient>(sp =>
+                    {
+                        var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
+                        var httpClient = clientFactory.CreateClient(); // Create HttpClient instance
+                        var authProvider = sp.GetRequiredService<IAuthenticationProvider>();
+                        return new ApiClient(httpClient, authProvider); // Pass HttpClient and auth provider to the custom API client
+                    });
+
+                    // Optionally, add logging and other services if necessary
                     services.AddLogging();
-                    // Register the SmartMeter service
-                    services.AddTransient<SmartMeter>();                })
+                })
                 .Build();
-            
-            using IServiceScope scope = host.Services.CreateScope();
-            SmartMeter smartMeter = scope.ServiceProvider.GetRequiredService<SmartMeter>();
-            await smartMeter.SimulateAsync(24);
+
+            using (var scope = host.Services.CreateScope())
+            {
+                var apiClient = scope.ServiceProvider.GetRequiredService<ApiClient>();
+
+                // Now you can use the ApiClient for API calls
+                // Example: await apiClient.CallSomeApiMethodAsync();
+            }
         }
     }
 }
