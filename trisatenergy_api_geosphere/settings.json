@@ -3,6 +3,10 @@
     "GeoSphereApiClient": {
       "BaseUrl": "https://dataset.api.hub.geosphere.at/v1"
     },
-    "JwtToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJ6MWNXYXV1MXFvMzFDTC1DeTVuUTkyRDJpWkIzTTBvUDM1cEE5V2ZiUlk0IiwiaWF0IjoxNzM1NDkwNTg3fQ.Im4p2UCpS7DhzegXgS10ClYapwvVVl_qVHqNA1hPwlc"
+    "MongoDB": {
+      "ConnectionString": "mongodb://root:password@localhost:27017",
+      "DatabaseName": "weather_db",
+      "CollectionName": "timeseries"
+    }
   }
 }
