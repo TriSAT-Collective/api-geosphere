@@ -1,4 +1,4 @@
-﻿using ApiSdk; // Include your generated API client namespace
+﻿using ApiSdk;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +11,9 @@ using MongoDB.Driver;
 using System;
 using System.Threading.Tasks;
 using trisatenergy_api_geosphere;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
 namespace trisatenergy_api_geosphere
 {
@@ -29,15 +32,12 @@ namespace trisatenergy_api_geosphere
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    // Register AppSettings as a configuration instance
                     services.Configure<AppSettings>(context.Configuration.GetSection(nameof(AppSettings)));
-                    // Add logging
                     services.AddLogging(builder =>
                     {
                         builder.AddConfiguration(context.Configuration.GetSection("AppSettings:Logging"));
                         builder.AddConsole();
                     });
-                    // Register the GeoSphere API client and MongoDB services
                     services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
                     services.AddSingleton<IAuthenticationProvider, AnonymousAuthenticationProvider>();
                     services.AddSingleton<IRequestAdapter, HttpClientRequestAdapter>();
@@ -53,7 +53,6 @@ namespace trisatenergy_api_geosphere
 
             try
             {
-                // GET historical timeseries
                 var timeseries_historical = await geoSphereClient.Timeseries.Historical["inca-v1-1h-1km"].GetAsync(requestConfig =>
                 {
                     requestConfig.QueryParameters.Start = "2023-01-01T00:00";
@@ -63,22 +62,13 @@ namespace trisatenergy_api_geosphere
                     requestConfig.QueryParameters.OutputFormat = "geojson";
                 });
 
-                // Create WeatherTimeSeriesModel from GeoJSON
-                var weatherTimeSeriesModel = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_historical);
+                var weatherTimeSeriesModels = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_historical);
 
-                // Set up MongoDB connection
-                var client = new MongoClient(appSettings.MongoDB.ConnectionString);
-                var database = client.GetDatabase(appSettings.MongoDB.DatabaseName);
-                var collection = database.GetCollection<WeatherTimeSeriesModel>(appSettings.MongoDB.CollectionName);
-                weatherTimeSeriesModel.ToJson();
-                // Save to MongoDB using the model's method
-                await weatherTimeSeriesModel.SaveToMongoDB(collection);
+                var collection = await MongoDBSetup.InitializeMongoDB(appSettings);
 
-                
-                // Export to JSON file
-                await weatherTimeSeriesModel.ExportToJsonFile("weather_timeseries.json");
+                await WeatherTimeSeriesModel.SaveToMongoDB(collection, weatherTimeSeriesModels);
 
-                Console.WriteLine("Response saved to MongoDB");
+                Console.WriteLine("Response saved to MongoDB and exported to JSON file");
             }
             catch (ApiSdk.Models.HTTPValidationError ex)
             {
