@@ -81,16 +81,16 @@
       },
       "Microsoft.Kiota.Bundle": {
         "type": "Direct",
-        "requested": "[1.15.2, )",
-        "resolved": "1.15.2",
-        "contentHash": "dMXJRms1ySC+S7xJMT/xoFWRNXpsGqlxMbg+bW3J8TIj67P1QlbidhNpahU5FBge1EubR59wIEMA7H+1EXycPQ==",
+        "requested": "[1.16.1, )",
+        "resolved": "1.16.1",
+        "contentHash": "SecX0vkXR0HAB8AAEHM9I8bh/A5LlEPrMkcUx1kMWvHFte2RqIo5roho4VCuFHRxoCEhV7F24fzHYb4BAWjHWw==",
         "dependencies": {
-          "Microsoft.Kiota.Abstractions": "1.15.2",
-          "Microsoft.Kiota.Http.HttpClientLibrary": "1.15.2",
-          "Microsoft.Kiota.Serialization.Form": "1.15.2",
-          "Microsoft.Kiota.Serialization.Json": "1.15.2",
-          "Microsoft.Kiota.Serialization.Multipart": "1.15.2",
-          "Microsoft.Kiota.Serialization.Text": "1.15.2"
+          "Microsoft.Kiota.Abstractions": "1.16.1",
+          "Microsoft.Kiota.Http.HttpClientLibrary": "1.16.1",
+          "Microsoft.Kiota.Serialization.Form": "1.16.1",
+          "Microsoft.Kiota.Serialization.Json": "1.16.1",
+          "Microsoft.Kiota.Serialization.Multipart": "1.16.1",
+          "Microsoft.Kiota.Serialization.Text": "1.16.1"
         }
       },
       "Microsoft.Kiota.Cli.Commons": {
@@ -443,18 +443,18 @@
       },
       "Microsoft.Kiota.Http.HttpClientLibrary": {
         "type": "Transitive",
-        "resolved": "1.15.2",
-        "contentHash": "WfVlAoajgsZHzqn1OKTOvSx6rcVSKOl4OLggg40yhz6F9f4wTNlrH5ucAXMzq31G6kmlLaoYulqd0iyhQNEbLg==",
+        "resolved": "1.16.1",
+        "contentHash": "TO/Nf2FTdrJdg1XsROvfrOvN0APkSROmXfWQNyyEmyDOxdMWBMKt0c8LtBhnxR23moVNesDT/x9F8Ceeyle99w==",
         "dependencies": {
-          "Microsoft.Kiota.Abstractions": "1.15.2"
+          "Microsoft.Kiota.Abstractions": "1.16.1"
         }
       },
       "Microsoft.Kiota.Serialization.Multipart": {
         "type": "Transitive",
-        "resolved": "1.15.2",
-        "contentHash": "JR2rDxF7PlvVslEGp2dVcevwyX+4ry6AuttZCwvd16fVqQfeZx26b5a207Fu0P5rr5qaEi0RdZrJSNqC7w2Eew==",
+        "resolved": "1.16.1",
+        "contentHash": "J1lwbuD+RuRc1fy0ENEfs8BKpiqK34ymj5O3ow2HsgWMiBvUJNHC1+BOpr3X3eOgqAXkar+nhplDdikR9U0WMQ==",
         "dependencies": {
-          "Microsoft.Kiota.Abstractions": "1.15.2"
+          "Microsoft.Kiota.Abstractions": "1.16.1"
         }
       },
       "Microsoft.NETCore.Platforms": {
