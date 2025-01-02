@@ -10,6 +10,11 @@
         "TimeseriesHistorical": "timeseries_historical",
         "TimeseriesForecast": "timeseries_forecast"
       }
+    },
+    "Misc": {
+      "ContinuousPullnStore": true,
+      "ContinuousPullnStoreIntervalMs": 3600000, //1 hour
+      "OnceOffPullnStoreHours": 48 //2 days historical, 2 days forecast
     }
   }
 }

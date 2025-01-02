@@ -1,9 +1,12 @@
+using System.ComponentModel;
+
 namespace trisatenergy_api_geosphere
 {
     public class AppSettings
     {
         public GeoSphereApiClientSettings GeoSphereApiClient { get; set; }
         public MongoDBSettings MongoDB { get; set; }
+        public MiscSettings Misc { get; set; }
     }
 
     public class GeoSphereApiClientSettings
@@ -24,4 +27,16 @@ namespace trisatenergy_api_geosphere
         public string TimeseriesHistorical { get; set; }
         public string TimeseriesForecast { get; set; }
     }
+    
+    public class MiscSettings
+    {
+        public bool ContinuousPullnStore { get; set; }
+
+        [DefaultValue(3000)] public int ContinuousPullnStoreIntervalMs { get; set; }
+
+        [DefaultValue(24)] public int OnceOffPullnStoreHours { get; set; }
+
+        public DateTime? PullnStoreStartTime { get; set; }
+    }
+
 }
