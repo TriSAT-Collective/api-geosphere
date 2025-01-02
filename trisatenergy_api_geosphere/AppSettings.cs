@@ -15,6 +15,13 @@ namespace trisatenergy_api_geosphere
     {
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }
-        public string CollectionName { get; set; }
+        
+        public MongoDBCollections Collections { get; set; }
+    }
+    
+    public class MongoDBCollections
+    {
+        public string TimeseriesHistorical { get; set; }
+        public string TimeseriesForecast { get; set; }
     }
 }

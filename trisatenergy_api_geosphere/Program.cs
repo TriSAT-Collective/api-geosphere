@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System;
 using System.Threading.Tasks;
@@ -50,13 +51,16 @@ namespace trisatenergy_api_geosphere
             var authProvider = scope.ServiceProvider.GetRequiredService<IAuthenticationProvider>();
             var adapter = scope.ServiceProvider.GetRequiredService<IRequestAdapter>();
             var geoSphereClient = scope.ServiceProvider.GetRequiredService<GeoSphereApiClient>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
             try
             {
+                var endTime = DateTime.UtcNow;
+                var startTime = endTime.AddHours(-48);
                 var timeseries_historical = await geoSphereClient.Timeseries.Historical["inca-v1-1h-1km"].GetAsync(requestConfig =>
                 {
-                    requestConfig.QueryParameters.Start = "2023-01-01T00:00";
-                    requestConfig.QueryParameters.End = "2023-01-02T00:00";
+                    requestConfig.QueryParameters.Start = startTime.ToString("yyyy-MM-ddTHH:mm");
+                    requestConfig.QueryParameters.End = endTime.ToString("yyyy-MM-ddTHH:mm");
                     requestConfig.QueryParameters.LatLon = new string[] { "47.0,15.0" };
                     requestConfig.QueryParameters.Parameters = new string[] { "T2M", "UU", "VV" };
                     requestConfig.QueryParameters.OutputFormat = "geojson";
@@ -64,21 +68,39 @@ namespace trisatenergy_api_geosphere
 
                 var weatherTimeSeriesModels = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_historical);
 
-                var collection = await MongoDBSetup.InitializeMongoDB(appSettings);
+                var historicalCollection = await MongoDBSetup.InitializeMongoDB(appSettings, appSettings.MongoDB.Collections.TimeseriesHistorical);
+                await WeatherTimeSeriesModel.SaveToMongoDB(historicalCollection, weatherTimeSeriesModels);
 
-                await WeatherTimeSeriesModel.SaveToMongoDB(collection, weatherTimeSeriesModels);
+                logger.LogInformation("Historical response saved to MongoDB. StartTime: {StartTime}, EndTime: {EndTime}, LatLon: {LatLon}, Dataset: {dataset}", startTime, endTime, string.Join(", ", new string[] { "47.0,15.0" }), "inca-v1-1h-1km");
+ 
+                
+                startTime =  DateTime.UtcNow;
+                endTime = startTime.AddHours(+48);
+                // Forecast timeseries query
+                var timeseries_forecast = await geoSphereClient.Timeseries.Forecast["nwp-v1-1h-2500m"].GetAsync(requestConfig =>
+                {
+                    requestConfig.QueryParameters.Start = startTime.ToString("yyyy-MM-ddTHH:mm");
+                    requestConfig.QueryParameters.End = endTime.ToString("yyyy-MM-ddTHH:mm");
+                    requestConfig.QueryParameters.LatLon  = new string[] { "47.0,15.0" };;
+                    requestConfig.QueryParameters.Parameters = new string[] { "t2m", "ugust", "vgust" };
+                    requestConfig.QueryParameters.OutputFormat = "geojson";
+                });
 
-                Console.WriteLine("Response saved to MongoDB and exported to JSON file");
+                var weatherTimeSeriesModelsForecast = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_forecast, true);
+                var forecastCollection = await MongoDBSetup.InitializeMongoDB(appSettings, appSettings.MongoDB.Collections.TimeseriesForecast);
+                await WeatherTimeSeriesModel.SaveToMongoDB(forecastCollection, weatherTimeSeriesModelsForecast);
+
+                logger.LogInformation("Forecast response saved to MongoDB. StartTime: {StartTime}, EndTime: {EndTime}, LatLon: {LatLon}, Dataset: {Dataset}", startTime, endTime, string.Join(", ", new string[] { "47.0,15.0" }), "nwp-v1-1h-2500m");
             }
             catch (ApiSdk.Models.HTTPValidationError ex)
             {
-                Console.WriteLine($"ERROR: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
+                logger.LogError($"ERROR: {ex.Message}");
+                logger.LogError(ex.StackTrace);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERROR: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
+                logger.LogError($"ERROR: {ex.Message}");
+                logger.LogError(ex.StackTrace);
             }
         }
     }

@@ -10,6 +10,7 @@ using Microsoft.Kiota.Serialization.Form;
 using Microsoft.Kiota.Serialization.Json;
 using Microsoft.Kiota.Serialization.Multipart;
 using Microsoft.Kiota.Serialization.Text;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace ApiSdk
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class GeoSphereApiClient : BaseRequestBuilder
     {
+        private readonly ILogger<GeoSphereApiClient> _logger;
         /// <summary>The datasets property</summary>
         public global::ApiSdk.Datasets.DatasetsRequestBuilder Datasets
         {
@@ -46,7 +48,7 @@ namespace ApiSdk
         /// Instantiates a new <see cref="global::ApiSdk.GeoSphereApiClient"/> and sets the default values.
         /// </summary>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public GeoSphereApiClient(IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
+        public GeoSphereApiClient(IRequestAdapter requestAdapter, ILogger<GeoSphereApiClient> logger) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
         {
             ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
             ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
@@ -55,6 +57,7 @@ namespace ApiSdk
             ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
             ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
             ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
+            _logger = logger;
             if (string.IsNullOrEmpty(RequestAdapter.BaseUrl))
             {
                 RequestAdapter.BaseUrl = "https://dataset.api.hub.geosphere.at/v1";

@@ -6,7 +6,10 @@
     "MongoDB": {
       "ConnectionString": "mongodb://root:password@localhost:27017",
       "DatabaseName": "weather_db",
-      "CollectionName": "timeseries"
+      "Collections": {
+        "TimeseriesHistorical": "timeseries_historical",
+        "TimeseriesForecast": "timeseries_forecast"
+      }
     }
   }
 }

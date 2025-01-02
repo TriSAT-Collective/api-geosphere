@@ -20,33 +20,70 @@ namespace trisatenergy_api_geosphere
 
         public double T2M { get; set; }
         public double UU { get; set; }
+        
         public double VV { get; set; }
+
 
         [BsonElement("geometry")]
         public GeoJsonGeometry Geometry { get; set; }
 
-        public static async Task<List<WeatherTimeSeriesModel>> FromGeoJSON(IParsable timeseries_historical)
+        public static async Task<List<WeatherTimeSeriesModel>> FromGeoJSON(IParsable timeseries, bool isForecast = false)
         {
-            var timeseriesJson = await KiotaJsonSerializer.SerializeAsStringAsync(timeseries_historical);
-            var options = new JsonSerializerOptions
+            List<WeatherTimeSeriesModel> models = null;
+            if (timeseries == null)
             {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-            var root = JsonSerializer.Deserialize<Root>(timeseriesJson, options);
-
-            var models = new List<WeatherTimeSeriesModel>();
-            for (int i = 0; i < root.Timestamps.Count; i++)
+                throw new ArgumentNullException(nameof(timeseries), "The timeseries object cannot be null.");
+            }  
+            
+            if (isForecast == false)
             {
-                models.Add(new WeatherTimeSeriesModel
+                var timeseriesJson = await KiotaJsonSerializer.SerializeAsStringAsync(timeseries);
+                var options = new JsonSerializerOptions
                 {
-                    Timestamp = DateTime.Parse(root.Timestamps[i]),
-                    T2M = root.Features[0].Properties.Parameters.T2M.Data[i],
-                    UU = root.Features[0].Properties.Parameters.UU.Data[i],
-                    VV = root.Features[0].Properties.Parameters.VV.Data[i],
-                    Geometry = root.Features[0].Geometry
-                });
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
+                var root = JsonSerializer.Deserialize<Root>(timeseriesJson, options);
+
+                models = new List<WeatherTimeSeriesModel>();
+                for (int i = 0; i < root.Timestamps.Count; i++)
+                {
+                    models.Add(new WeatherTimeSeriesModel
+                    {
+                        Timestamp = DateTime.Parse(root.Timestamps[i]),
+                        T2M = root.Features[0].Properties.Parameters.T2M.Data[i],
+                        UU = root.Features[0].Properties.Parameters.UU.Data[i],
+                        VV = root.Features[0].Properties.Parameters.VV.Data[i],
+                        Geometry = root.Features[0].Geometry
+                    });
+                }
+                
             }
+            else
+            {
+                var timeseriesJson = await KiotaJsonSerializer.SerializeAsStringAsync(timeseries);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
+                var root = JsonSerializer.Deserialize<Root>(timeseriesJson, options);
+
+                models = new List<WeatherTimeSeriesModel>();
+                for (int i = 0; i < root.Timestamps.Count; i++)
+                {
+                    
+                    models.Add(new WeatherTimeSeriesModel
+                    {
+                        Timestamp = DateTime.Parse(root.Timestamps[i]),
+                        T2M = root.Features[0].Properties.Parameters.T2M.Data[i],
+                        UU = root.Features[0].Properties.Parameters.UGUST.Data[i], 
+                        VV = root.Features[0].Properties.Parameters.VGUST.Data[i],
+                        Geometry = root.Features[0].Geometry
+                    });
+                }
+            }
+
             return models;
         }
 
@@ -103,7 +140,9 @@ namespace trisatenergy_api_geosphere
     {
         public Parameter T2M { get; set; }
         public Parameter UU { get; set; }
+        public Parameter UGUST { get; set; }
         public Parameter VV { get; set; }
+        public Parameter VGUST { get; set; }
     }
 
     public class Parameter

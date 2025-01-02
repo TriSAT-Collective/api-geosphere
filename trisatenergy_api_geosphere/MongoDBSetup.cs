@@ -5,11 +5,11 @@ namespace trisatenergy_api_geosphere
 {
     public static class MongoDBSetup
     {
-        public static async Task<IMongoCollection<WeatherTimeSeriesModel>> InitializeMongoDB(AppSettings appSettings)
+        public static async Task<IMongoCollection<WeatherTimeSeriesModel>> InitializeMongoDB(AppSettings appSettings, string CollectionName)
         {
             var client = new MongoClient(appSettings.MongoDB.ConnectionString);
             var database = client.GetDatabase(appSettings.MongoDB.DatabaseName);
-            var collection = database.GetCollection<WeatherTimeSeriesModel>(appSettings.MongoDB.CollectionName);
+            var collection = database.GetCollection<WeatherTimeSeriesModel>(CollectionName);
 
             // Create a compound unique index on the Timestamp and Geometry fields
             var indexKeysDefinition = Builders<WeatherTimeSeriesModel>.IndexKeys
