@@ -20,8 +20,7 @@ namespace trisatenergy_api_geosphere
 {
     internal class Program
     {
-        private static async Task Main(string[] args)
-        {
+        private static async Task Main(string[] args){
             var cancellationTokenSource = new CancellationTokenSource();
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
@@ -49,7 +48,40 @@ namespace trisatenergy_api_geosphere
                     services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
                     services.AddSingleton<IAuthenticationProvider, AnonymousAuthenticationProvider>();
                     services.AddSingleton<IRequestAdapter, HttpClientRequestAdapter>();
-                    services.AddSingleton<GeoSphereApiClient>();
+                    services.AddSingleton<GeoSphereApiClient>(serviceProvider =>
+                    {
+                        var requestAdapter = serviceProvider.GetRequiredService<IRequestAdapter>();
+                        var appSettings = serviceProvider.GetRequiredService<IOptions<AppSettings>>();
+                        var logger = serviceProvider.GetRequiredService<ILogger<GeoSphereApiClient>>();
+                        var collectionResolver = serviceProvider.GetRequiredService<CollectionResolver>();
+                        return new GeoSphereApiClient(requestAdapter, appSettings, logger, collectionResolver);
+                    });
+                    // Register the MongoDB collections
+                    services.AddSingleton(sp =>
+                    {
+                        var appSettings = sp.GetRequiredService<IOptions<AppSettings>>().Value;
+                        return MongoDBSetup.InitializeMongoDB(appSettings, appSettings.MongoDB.Collections.TimeseriesHistorical).Result;
+                    });
+
+                    services.AddSingleton(sp =>
+                    {
+                        var appSettings = sp.GetRequiredService<IOptions<AppSettings>>().Value;
+                        return MongoDBSetup.InitializeMongoDB(appSettings, appSettings.MongoDB.Collections.TimeseriesForecast).Result;
+                    });
+                    // Register the CollectionResolver
+                    services.AddTransient<CollectionResolver>(serviceProvider => key =>
+                    {
+                        var appSettings = serviceProvider.GetRequiredService<IOptions<AppSettings>>().Value;
+                        switch (key)
+                        {
+                            case "Historical":
+                                return MongoDBSetup.InitializeMongoDB(appSettings, appSettings.MongoDB.Collections.TimeseriesHistorical).Result;
+                            case "Forecast":
+                                return MongoDBSetup.InitializeMongoDB(appSettings, appSettings.MongoDB.Collections.TimeseriesForecast).Result;
+                            default:
+                                throw new KeyNotFoundException(); 
+                        }
+                    });
                 })
                 .Build();
 

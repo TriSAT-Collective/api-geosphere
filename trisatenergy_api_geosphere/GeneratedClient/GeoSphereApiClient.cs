@@ -17,6 +17,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System;
 using trisatenergy_api_geosphere;
+using MongoDB.Driver;
 namespace ApiSdk
 {
     /// <summary>
@@ -27,6 +28,8 @@ namespace ApiSdk
     {
         private readonly ILogger<GeoSphereApiClient> _logger;
         private readonly AppSettings _settings;
+        private readonly IMongoCollection<WeatherTimeSeriesModel> _historicalCollection;
+        private readonly IMongoCollection<WeatherTimeSeriesModel> _forecastCollection;
         /// <summary>The datasets property</summary>
         public global::ApiSdk.Datasets.DatasetsRequestBuilder Datasets
         {
@@ -51,7 +54,7 @@ namespace ApiSdk
         /// Instantiates a new <see cref="global::ApiSdk.GeoSphereApiClient"/> and sets the default values.
         /// </summary>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public GeoSphereApiClient(IRequestAdapter requestAdapter, IOptions<AppSettings> settings, ILogger<GeoSphereApiClient> logger) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
+        public GeoSphereApiClient(IRequestAdapter requestAdapter, IOptions<AppSettings> settings, ILogger<GeoSphereApiClient> logger, CollectionResolver collectionResolver) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
         {
             ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
             ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
@@ -62,6 +65,8 @@ namespace ApiSdk
             ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
             _logger = logger;
             _settings = settings.Value;
+            _historicalCollection = collectionResolver("Historical");;
+            _forecastCollection = collectionResolver("Forecast");
             if (string.IsNullOrEmpty(RequestAdapter.BaseUrl))
             {
                 RequestAdapter.BaseUrl = "https://dataset.api.hub.geosphere.at/v1";
@@ -72,7 +77,6 @@ namespace ApiSdk
         public async Task Start()
         {   
             DateTime startTime = _settings.Misc.PullnStoreStartTime ?? DateTime.Now;
-            _logger.LogError("THE startTime IS: {startTime}", startTime);
             if (_settings.Misc.ContinuousPullnStore)
             {
                 _logger.LogInformation("Starting continuous Pull'n'Store...");
@@ -114,11 +118,9 @@ namespace ApiSdk
 
                 var weatherTimeSeriesModels = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_historical);
 
-                var historicalCollection = await MongoDBSetup.InitializeMongoDB(_settings, _settings.MongoDB.Collections.TimeseriesHistorical);
-                await WeatherTimeSeriesModel.SaveToMongoDB(historicalCollection, weatherTimeSeriesModels);
+                await WeatherTimeSeriesModel.SaveToMongoDB(_historicalCollection, weatherTimeSeriesModels);
 
                 _logger.LogInformation("Historical response saved to MongoDB. Start: {Start}, End: {EndT}, LatLon: {LatLon}, Dataset: {dataset}", start, end, string.Join(", ", new string[] { "47.0,15.0" }), "inca-v1-1h-1km");
- 
                 
                 start =  startTime;
                 end = start.AddHours(+hours);
@@ -133,8 +135,7 @@ namespace ApiSdk
                 });
 
                 var weatherTimeSeriesModelsForecast = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_forecast, true);
-                var forecastCollection = await MongoDBSetup.InitializeMongoDB(_settings, _settings.MongoDB.Collections.TimeseriesForecast);
-                await WeatherTimeSeriesModel.SaveToMongoDB(forecastCollection, weatherTimeSeriesModelsForecast);
+                await WeatherTimeSeriesModel.SaveToMongoDB(_forecastCollection, weatherTimeSeriesModelsForecast);
 
                 _logger.LogInformation("Forecast response saved to MongoDB. Start: {Start}, End: {End}, LatLon: {LatLon}, Dataset: {Dataset}", start, end, string.Join(", ", new string[] { "47.0,15.0" }), "nwp-v1-1h-2500m");
             }
