@@ -1,45 +1,68 @@
-﻿using ApiSdk; // Include your generated API client namespace
+﻿using ApiSdk;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using System;
 using System.Threading.Tasks;
-using ApiSdk.Datasets;
-using Microsoft.Kiota.Abstractions.Serialization; // Serialization namespace
-using Microsoft.Kiota.Serialization.Json; // Correct import for Kiota JSON serialization
+using trisatenergy_api_geosphere;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
-class Program
+namespace trisatenergy_api_geosphere
 {
-    static async Task Main(string[] args)
+    internal class Program
     {
-        // Set up the anonymous authentication provider (since the API doesn't require authentication)
-        var authProvider = new AnonymousAuthenticationProvider();
-
-        // Create request adapter using the HttpClient-based implementation
-        var adapter = new HttpClientRequestAdapter(authProvider);
-
-        // Create the GeoSphere API client
-        var geoSphereClient = new GeoSphereApiClient(adapter);
-
-        try
+        private static async Task Main(string[] args)
         {
-            // GET /datasets (example)
-            var datasets = await geoSphereClient.Datasets.GetAsync();
-            Console.WriteLine($"Retrieved {datasets}");
+            var cancellationTokenSource = new CancellationTokenSource();
+            Console.CancelKeyPress += (sender, eventArgs) =>
+            {
+                eventArgs.Cancel = true; // Prevent immediate termination
+                cancellationTokenSource.Cancel();
+            };
             
-            // GET historical timeseries -> error 
-            //ERROR: The server returned an unexpected status code and no error factory is registered for this code: 400
+            IHost host = Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    config
+                        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                        .AddJsonFile("settings.json", false, true)
+                        .AddEnvironmentVariables()
+                        .AddCommandLine(args);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    services.Configure<AppSettings>(context.Configuration.GetSection(nameof(AppSettings)));
+                    services.AddLogging(builder =>
+                    {
+                        builder.AddConfiguration(context.Configuration.GetSection("AppSettings:Logging"));
+                        builder.AddConsole();
+                    });
+                    services.AddSingleton(sp => sp.GetRequiredService<IOptions<AppSettings>>().Value);
+                    services.AddSingleton<IAuthenticationProvider, AnonymousAuthenticationProvider>();
+                    services.AddSingleton<IRequestAdapter, HttpClientRequestAdapter>();
+                    services.AddSingleton<GeoSphereApiClient>();
+                })
+                .Build();
 
-            var timeseries_historical = await geoSphereClient.Timeseries.Historical["inca-v1-1h-1km"].GetAsync();
-            Console.WriteLine($"Retrieved {timeseries_historical}");
-
+            using IServiceScope scope = host.Services.CreateScope();
+            var appSettings = scope.ServiceProvider.GetRequiredService<AppSettings>();
+            var authProvider = scope.ServiceProvider.GetRequiredService<IAuthenticationProvider>();
+            var adapter = scope.ServiceProvider.GetRequiredService<IRequestAdapter>();
+            var geoSphereClient = scope.ServiceProvider.GetRequiredService<GeoSphereApiClient>();
+            // Start the application
+            Task geoSphereClientTask = geoSphereClient.Start();
+            // Wait for the application to complete or the shutdown signal
+            await Task.WhenAny(geoSphereClientTask, Task.Delay(Timeout.Infinite, cancellationTokenSource.Token));
             
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"ERROR: {ex.Message}");
-            Console.WriteLine(ex.StackTrace);
         }
     }
-
-
 }
