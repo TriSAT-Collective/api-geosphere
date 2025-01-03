@@ -1,12 +1,12 @@
-FROM mcr.microsoft.com/dotnet/runtime:8.0
+FROM mcr.microsoft.com/dotnet/runtime:9.0
 
 WORKDIR /app
 
-ARG REPO_SOURCE=https://github.com/TriSAT-Collective/smart-meter-simulation
-ARG DESCRIPTION="simulates smart meter data"
+ARG REPO_SOURCE=https://github.com/TriSAT-Collective/api-geosphere
+ARG DESCRIPTION="imports weather data from geosphere"
 ARG ARTIFACT_PATH=dist/
 
-ARG ENTRYPOINT=/app/trisatenergy_smartmeters
+ARG ENTRYPOINT=/app/trisatenergy_api_geosphere
 ENV ENTRYPOINT=$ENTRYPOINT
 
 ARG RABBITMQ_USERNAME
