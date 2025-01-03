@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System;
 using trisatenergy_api_geosphere;
 using MongoDB.Driver;
+
 namespace ApiSdk
 {
     /// <summary>
@@ -26,10 +27,6 @@ namespace ApiSdk
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class GeoSphereApiClient : BaseRequestBuilder
     {
-        private readonly ILogger<GeoSphereApiClient> _logger;
-        private readonly AppSettings _settings;
-        private readonly IMongoCollection<WeatherTimeSeriesModel> _historicalCollection;
-        private readonly IMongoCollection<WeatherTimeSeriesModel> _forecastCollection;
         /// <summary>The datasets property</summary>
         public global::ApiSdk.Datasets.DatasetsRequestBuilder Datasets
         {
@@ -54,7 +51,7 @@ namespace ApiSdk
         /// Instantiates a new <see cref="global::ApiSdk.GeoSphereApiClient"/> and sets the default values.
         /// </summary>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public GeoSphereApiClient(IRequestAdapter requestAdapter, IOptions<AppSettings> settings, ILogger<GeoSphereApiClient> logger, CollectionResolver collectionResolver) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
+        public GeoSphereApiClient(IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}", new Dictionary<string, object>())
         {
             ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
             ApiClientBuilder.RegisterDefaultSerializer<TextSerializationWriterFactory>();
@@ -63,97 +60,12 @@ namespace ApiSdk
             ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
             ApiClientBuilder.RegisterDefaultDeserializer<TextParseNodeFactory>();
             ApiClientBuilder.RegisterDefaultDeserializer<FormParseNodeFactory>();
-            _logger = logger;
-            _settings = settings.Value;
-            _historicalCollection = collectionResolver("Historical");;
-            _forecastCollection = collectionResolver("Forecast");
             if (string.IsNullOrEmpty(RequestAdapter.BaseUrl))
             {
                 RequestAdapter.BaseUrl = "https://dataset.api.hub.geosphere.at/v1";
             }
             PathParameters.TryAdd("baseurl", RequestAdapter.BaseUrl);
         }
-        
-        public async Task Start()
-        {   
-            DateTime startTime = _settings.Misc.PullnStoreStartTime ?? DateTime.Now;
-            if (_settings.Misc.ContinuousPullnStore)
-            {
-                _logger.LogInformation("Starting continuous Pull'n'Store...");
-                await ContinuousPullnStore(startTime);
-            }
-            else
-            {
-                _logger.LogInformation("Starting once-off Pull'n'Store... Pulling +- {Hours} hours",
-                    _settings.Misc.OnceOffPullnStoreHours);
-                await OnceOffPullnStoreHours(startTime, _settings.Misc.OnceOffPullnStoreHours);
-            }
-        }
-        
-        private async Task ContinuousPullnStore(DateTime startTime)
-        {
-            startTime = new DateTime(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, 0, 0, startTime.Kind);
-            while (true)
-            {
-                await OnceOffPullnStoreHours(startTime, 1);
-                await Task.Delay(_settings.Misc.ContinuousPullnStoreIntervalMs);
-                startTime = startTime.AddHours(1);
-            }
-        }
-
-        private async Task OnceOffPullnStoreHours(DateTime startTime, int hours)
-        {
-            try
-            {
-                var end = startTime;
-                var start = end.AddHours(-hours);
-                var timeseries_historical = await this.Timeseries.Historical["inca-v1-1h-1km"].GetAsync(requestConfig =>
-                {
-                    requestConfig.QueryParameters.Start = start.ToString("yyyy-MM-ddTHH:mm");
-                    requestConfig.QueryParameters.End = end.ToString("yyyy-MM-ddTHH:mm");
-                    requestConfig.QueryParameters.LatLon = new string[] { "47.0,15.0" };
-                    requestConfig.QueryParameters.Parameters = new string[] { "T2M", "UU", "VV" };
-                    requestConfig.QueryParameters.OutputFormat = "geojson";
-                });
-
-                var weatherTimeSeriesModels = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_historical);
-
-                await WeatherTimeSeriesModel.SaveToMongoDB(_historicalCollection, weatherTimeSeriesModels);
-
-                _logger.LogInformation("Historical response saved to MongoDB. Start: {Start}, End: {EndT}, LatLon: {LatLon}, Dataset: {dataset}", start, end, string.Join(", ", new string[] { "47.0,15.0" }), "inca-v1-1h-1km");
-                
-                start =  startTime;
-                end = start.AddHours(+hours);
-                // Forecast timeseries query
-                var timeseries_forecast = await this.Timeseries.Forecast["nwp-v1-1h-2500m"].GetAsync(requestConfig =>
-                {
-                    requestConfig.QueryParameters.Start = start.ToString("yyyy-MM-ddTHH:mm");
-                    requestConfig.QueryParameters.End = end.ToString("yyyy-MM-ddTHH:mm");
-                    requestConfig.QueryParameters.LatLon  = new string[] { "47.0,15.0" };;
-                    requestConfig.QueryParameters.Parameters = new string[] { "t2m", "ugust", "vgust" };
-                    requestConfig.QueryParameters.OutputFormat = "geojson";
-                });
-
-                var weatherTimeSeriesModelsForecast = await WeatherTimeSeriesModel.FromGeoJSON(timeseries_forecast, true);
-                await WeatherTimeSeriesModel.SaveToMongoDB(_forecastCollection, weatherTimeSeriesModelsForecast);
-
-                _logger.LogInformation("Forecast response saved to MongoDB. Start: {Start}, End: {End}, LatLon: {LatLon}, Dataset: {Dataset}", start, end, string.Join(", ", new string[] { "47.0,15.0" }), "nwp-v1-1h-2500m");
-            }
-            catch (ApiSdk.Models.HTTPValidationError ex)
-            {
-                _logger.LogError($"ERROR: {ex.Message}");
-                _logger.LogError(ex.StackTrace);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"ERROR: {ex.Message}");
-                _logger.LogError(ex.StackTrace);
-            }
-        }
-
-
-
-
     }
 }
 #pragma warning restore CS0618

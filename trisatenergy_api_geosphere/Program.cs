@@ -54,8 +54,19 @@ namespace trisatenergy_api_geosphere
                         var appSettings = serviceProvider.GetRequiredService<IOptions<AppSettings>>();
                         var logger = serviceProvider.GetRequiredService<ILogger<GeoSphereApiClient>>();
                         var collectionResolver = serviceProvider.GetRequiredService<CollectionResolver>();
-                        return new GeoSphereApiClient(requestAdapter, appSettings, logger, collectionResolver);
+                        return new GeoSphereApiClient(requestAdapter);
                     });
+                    
+                    services.AddSingleton<GeoSphereApiClientWrapper>(serviceProvider =>
+                    {
+                        var geoSphereApiClient = serviceProvider.GetRequiredService<GeoSphereApiClient>();
+                        var appSettings = serviceProvider.GetRequiredService<IOptions<AppSettings>>();
+                        var logger = serviceProvider.GetRequiredService<ILogger<GeoSphereApiClientWrapper>>();
+                        var collectionResolver = serviceProvider.GetRequiredService<CollectionResolver>();
+                        return new GeoSphereApiClientWrapper(geoSphereApiClient, appSettings, logger, collectionResolver);
+                    });
+                    
+                    
                     // Register the MongoDB collections
                     services.AddSingleton(sp =>
                     {
@@ -89,7 +100,7 @@ namespace trisatenergy_api_geosphere
             var appSettings = scope.ServiceProvider.GetRequiredService<AppSettings>();
             var authProvider = scope.ServiceProvider.GetRequiredService<IAuthenticationProvider>();
             var adapter = scope.ServiceProvider.GetRequiredService<IRequestAdapter>();
-            var geoSphereClient = scope.ServiceProvider.GetRequiredService<GeoSphereApiClient>();
+            var geoSphereClient = scope.ServiceProvider.GetRequiredService<GeoSphereApiClientWrapper>();
             // Start the application
             Task geoSphereClientTask = geoSphereClient.Start();
             // Wait for the application to complete or the shutdown signal
