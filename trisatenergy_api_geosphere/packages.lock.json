@@ -71,12 +71,12 @@
       },
       "Microsoft.Kiota.Authentication.Azure": {
         "type": "Direct",
-        "requested": "[1.16.1, )",
-        "resolved": "1.16.1",
-        "contentHash": "MsMQgYaZ8CDGM5BdAm33njyM8Sc7dqhaO2oMTRi+WdJ+RFRyYa7+9p0GKsXLeppz82/5ST5Ly28jdtIl+nRToQ==",
+        "requested": "[1.16.3, )",
+        "resolved": "1.16.3",
+        "contentHash": "I66c3nhD+mm6z2YrVqm0BgN1MrD/UWAAl91uwt2+p99W1ZUqp4abfnlf05cAdWo9hPzUxU+46L3Vump8CGij6A==",
         "dependencies": {
           "Azure.Core": "1.44.1",
-          "Microsoft.Kiota.Abstractions": "1.16.1"
+          "Microsoft.Kiota.Abstractions": "1.16.3"
         }
       },
       "Microsoft.Kiota.Bundle": {
