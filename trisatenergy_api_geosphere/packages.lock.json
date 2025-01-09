@@ -118,11 +118,11 @@
       },
       "Microsoft.Kiota.Serialization.Json": {
         "type": "Direct",
-        "requested": "[1.16.1, )",
-        "resolved": "1.16.1",
-        "contentHash": "U3En77LexFV5iZOJH6EUdatJwEEoFNAPNvC7ytGDfANg+jyNq0i9ni11BNeJehQ+y11GyVSK+4fbSmxTANrC0w==",
+        "requested": "[1.16.3, )",
+        "resolved": "1.16.3",
+        "contentHash": "gjO27GIB04FIKHUUrJAOS7stRC8d+CGtf824pkzICOOmiqA/XHtqJuu+LQG8lzxPV4gEwYNYP4OnulTY7DFMvQ==",
         "dependencies": {
-          "Microsoft.Kiota.Abstractions": "1.16.1"
+          "Microsoft.Kiota.Abstractions": "1.16.3"
         }
       },
       "Microsoft.Kiota.Serialization.Text": {
