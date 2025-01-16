@@ -127,11 +127,11 @@
       },
       "Microsoft.Kiota.Serialization.Text": {
         "type": "Direct",
-        "requested": "[1.16.3, )",
-        "resolved": "1.16.3",
-        "contentHash": "wwSHcR2yJWdsAMbSTGRBDEs8pfGlRqCWLu57qARkleq9upiJHsIjhKTDSNaXzNjDs3jj82PiL1KW6vdVZ3PpaA==",
+        "requested": "[1.16.4, )",
+        "resolved": "1.16.4",
+        "contentHash": "TkThf7kvYwcGLW9OlxCkfppjJzV/YOrUfZhK8YYKshPwfOrsw4AkH35oUx/seC9pxxzb9xKecMHJ2GstunD53Q==",
         "dependencies": {
-          "Microsoft.Kiota.Abstractions": "1.16.3"
+          "Microsoft.Kiota.Abstractions": "1.16.4"
         }
       },
       "MongoDB.Bson": {
