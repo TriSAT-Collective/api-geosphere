@@ -10,8 +10,15 @@ using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace trisatenergy_api_geosphere
 {
+    /// <summary>
+    /// The main entry point of the application.
+    /// </summary>
     internal class Program
     {
+        /// <summary>
+        /// The main method that starts the application.
+        /// </summary>
+        /// <param name="args">The command-line arguments.</param>
         private static async Task Main(string[] args){
             var cancellationTokenSource = new CancellationTokenSource();
             Console.CancelKeyPress += (sender, eventArgs) =>

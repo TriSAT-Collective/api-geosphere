@@ -14,38 +14,61 @@
 
 ## About
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc vulputate tincidunt.
+The `smart-meter-simulation` project simulates the behavior of smart meters, providing a platform to test and analyze energy consumption data. It is designed to help developers and researchers understand and optimize energy usage patterns.
 
 ## Features
 
-> Describe the features
-
-## Dependencies
-
-> If there are any third-party dependencies, they should be listed here.
+- Simulates energy consumption data for smart meters.
+- Provides APIs to retrieve and analyze the simulated data.
+- Supports historical and forecasted timeseries data.
+- Integrates with MongoDB for data storage.
+- Configurable settings for simulation parameters.
 
 ## Building
 
-> Describe how to build the project.
+To build the project, use the following command:
+```bash
+dotnet build
+```
 
 ## Installation
 
-> Describe how to install the project.
+To install the project, clone the repository and navigate to the project directory:
+```bash
+git clone https://github.com/yourusername/smart-meter-simulation.git
+```
+```bash
+cd smart-meter-simulation
+```
 
 ## Usage
 
-> Describe how to use the project.
+To run the application, use the following command:
+```bash
+dotnet run
+```
 
 ## Configuration
 
-> Describe how to configure the project.
-
-```toml
-[general]
-log_level = "info"
-show_banner = true
+The project can be configured using the appsettings.json file. Below is an example configuration:
+```JSON
+{
+  "GeoSphereApiClient": {
+    "BaseUrl": "https://dataset.api.hub.geosphere.at/v1"
+  },
+  "MongoDB": {
+    "ConnectionString": "mongodb://localhost:27017",
+    "DatabaseName": "smart_meter_db",
+    "Collections": {
+      "TimeseriesHistorical": "historical_data",
+      "TimeseriesForecast": "forecast_data"
+    }
+  },
+  "Misc": {
+    "ContinuousPullnStore": true,
+    "ContinuousPullnStoreIntervalMs": 3000,
+    "OnceOffPullnStoreHours": 24,
+    "PullnStoreStartTime": "2023-01-01T00:00:00Z"
+  }
+}
 ```
-
-## Shoutout
-
-> Give a shoutout to any libraries or projects that inspired this one.
