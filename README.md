@@ -1,9 +1,8 @@
-<h1 align="center">smart-meter-simulation</h1>
+<h1 align="center">api-geosphere</h1>
 
 <p align="center">
   <a href="#about">About</a> •
   <a href="#features">Features</a> •
-  <a href="#dependencies">Dependencies</a> •
   <a href="#building">Building</a> •
   <a href="#installation">Installation</a> •
   <a href="#usage">Usage</a> •
@@ -14,15 +13,12 @@
 
 ## About
 
-The `smart-meter-simulation` project simulates the behavior of smart meters, providing a platform to test and analyze energy consumption data. It is designed to help developers and researchers understand and optimize energy usage patterns.
+The `api-geosphere` pulls data from the geosphere API and provides historical and forecast data.
 
 ## Features
 
-- Simulates energy consumption data for smart meters.
-- Provides APIs to retrieve and analyze the simulated data.
-- Supports historical and forecasted timeseries data.
-- Integrates with MongoDB for data storage.
-- Configurable settings for simulation parameters.
+- Pulls historical weather data and stores it in the MongoDB
+- Pulls forecast weather data and stores it in the MongoDB
 
 ## Building
 
@@ -35,10 +31,10 @@ dotnet build
 
 To install the project, clone the repository and navigate to the project directory:
 ```bash
-git clone https://github.com/yourusername/smart-meter-simulation.git
+git clone https://github.com/TriSAT-Collective/api-geosphere.git
 ```
 ```bash
-cd smart-meter-simulation
+cd api-geosphere
 ```
 
 ## Usage
