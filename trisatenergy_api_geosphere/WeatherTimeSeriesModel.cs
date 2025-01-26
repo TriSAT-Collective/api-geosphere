@@ -46,18 +46,18 @@ namespace trisatenergy_api_geosphere
                 var root = JsonSerializer.Deserialize<Root>(timeseriesJson, options);
 
                 models = new List<WeatherTimeSeriesModel>();
-                for (int i = 0; i < root.Timestamps.Count; i++)
-                {
-                    models.Add(new WeatherTimeSeriesModel
+                if (root != null)
+                    for (int i = 0; i < root.Timestamps.Count; i++)
                     {
-                        Timestamp = DateTime.Parse(root.Timestamps[i]),
-                        T2M = root.Features[0].Properties.Parameters.T2M.Data[i],
-                        UU = root.Features[0].Properties.Parameters.UU.Data[i],
-                        VV = root.Features[0].Properties.Parameters.VV.Data[i],
-                        Geometry = root.Features[0].Geometry
-                    });
-                }
-                
+                        models.Add(new WeatherTimeSeriesModel
+                        {
+                            Timestamp = DateTime.Parse(root.Timestamps[i]),
+                            T2M = root.Features[0].Properties.Parameters.T2M.Data[i],
+                            UU = root.Features[0].Properties.Parameters.UU.Data[i],
+                            VV = root.Features[0].Properties.Parameters.VV.Data[i],
+                            Geometry = root.Features[0].Geometry
+                        });
+                    }
             }
             else
             {
@@ -70,18 +70,18 @@ namespace trisatenergy_api_geosphere
                 var root = JsonSerializer.Deserialize<Root>(timeseriesJson, options);
 
                 models = new List<WeatherTimeSeriesModel>();
-                for (int i = 0; i < root.Timestamps.Count; i++)
-                {
-                    
-                    models.Add(new WeatherTimeSeriesModel
+                if (root != null)
+                    for (int i = 0; i < root.Timestamps.Count; i++)
                     {
-                        Timestamp = DateTime.Parse(root.Timestamps[i]),
-                        T2M = root.Features[0].Properties.Parameters.T2M.Data[i],
-                        UU = root.Features[0].Properties.Parameters.UGUST.Data[i], 
-                        VV = root.Features[0].Properties.Parameters.VGUST.Data[i],
-                        Geometry = root.Features[0].Geometry
-                    });
-                }
+                        models.Add(new WeatherTimeSeriesModel
+                        {
+                            Timestamp = DateTime.Parse(root.Timestamps[i]),
+                            T2M = root.Features[0].Properties.Parameters.T2M.Data[i],
+                            UU = root.Features[0].Properties.Parameters.UGUST.Data[i],
+                            VV = root.Features[0].Properties.Parameters.VGUST.Data[i],
+                            Geometry = root.Features[0].Geometry
+                        });
+                    }
             }
 
             return models;

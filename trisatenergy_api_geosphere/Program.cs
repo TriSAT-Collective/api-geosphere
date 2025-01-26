@@ -7,14 +7,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Http.HttpClientLibrary;
-using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
-using System;
-using System.Threading.Tasks;
-using trisatenergy_api_geosphere;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
 
 namespace trisatenergy_api_geosphere
 {

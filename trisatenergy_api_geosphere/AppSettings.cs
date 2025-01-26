@@ -4,9 +4,9 @@ namespace trisatenergy_api_geosphere
 {
     public class AppSettings
     {
-        public GeoSphereApiClientSettings GeoSphereApiClient { get; set; }
-        public MongoDBSettings MongoDB { get; set; }
-        public MiscSettings Misc { get; set; }
+        public GeoSphereApiClientSettings GeoSphereApiClient { get; init; }
+        public MongoDBSettings MongoDB { get; init; }
+        public MiscSettings Misc { get; init; }
     }
 
     public class GeoSphereApiClientSettings
