@@ -14,7 +14,7 @@
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
         <PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.17.1" />
         <PackageReference Include="Microsoft.Kiota.Authentication.Azure" Version="1.17.1" />
-        <PackageReference Include="Microsoft.Kiota.Bundle" Version="1.17.0" />
+        <PackageReference Include="Microsoft.Kiota.Bundle" Version="1.17.1" />
         <PackageReference Include="Microsoft.Kiota.Cli.Commons" Version="1.1.2" />
         <PackageReference Include="Microsoft.Kiota.Serialization.Form" Version="1.17.1" />
         <PackageReference Include="Microsoft.Kiota.Serialization.Json" Version="1.17.1" />
