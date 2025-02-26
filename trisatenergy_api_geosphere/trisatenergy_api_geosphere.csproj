@@ -21,7 +21,7 @@
         <PackageReference Include="Microsoft.Kiota.Serialization.Text" Version="1.17.1" />
         <PackageReference Include="MongoDB.Bson" Version="3.2.1" />
         <PackageReference Include="MongoDB.Driver" Version="3.2.1" />
-        <PackageReference Include="RabbitMQ.Client" Version="7.1.0" />
+        <PackageReference Include="RabbitMQ.Client" Version="7.1.1" />
         <None Update="settings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
